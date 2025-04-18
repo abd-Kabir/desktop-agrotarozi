@@ -1,0 +1,5 @@
+Django
+PyQt5
+PyQtWebEngine
+pyserial
+requests

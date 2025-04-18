@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Serial Data Reader</title>
+    <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+</head>
+<body>
+<h1>Serial Data Reader</h1>
+<button id="start">Start Reading</button>
+<button id="stop">Stop Reading</button>
+<h2>Received Data:</h2>
+<ul id="data-list"></ul>
+
+<script>
+    $("#start").click(function () {
+        $.get("/start/", function (response) {
+            alert(response.status);
+        });
+    });
+
+    $("#stop").click(function () {
+        $.get("/stop/", function (response) {
+            alert(response.status);
+        });
+    });
+
+    function fetchData() {
+        $.get("/data/", function (response) {
+            let dataList = $("#data-list").children("li"); // Get existing list items
+
+            response.data.forEach(function (item, index) {
+                if (dataList.length > index) {
+                    // If list item exists, update its content
+                    $(dataList[index]).text(item);
+                } else {
+                    // If new data exceeds current list length, add new items
+                    $("#data-list").append("<li>" + item + "</li>");
+                }
+            });
+
+            // Remove extra list items if new data is shorter
+            if (dataList.length > response.data.length) {
+                dataList.slice(response.data.length).remove();
+            }
+        });
+    }
+
+    setInterval(fetchData, 20);  // Fetch data every 2 seconds
+</script>
+</body>
+</html>
