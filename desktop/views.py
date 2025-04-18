@@ -6,9 +6,9 @@ from django.http import JsonResponse
 import threading
 
 
-def list_com_ports():
+def list_com_ports(request):
     ports = comports()
-    return [port.device for port in ports]
+    return JsonResponse({'comports': [port.device for port in ports]})
 
 
 def render_html(request):
@@ -22,9 +22,10 @@ is_reading = False
 
 def read_serial():
     global is_reading, serial_data
-    ser = serial.Serial("COM5", baudrate=9600, timeout=1)
+    ser = serial.Serial("COM1", baudrate=9600, timeout=1)
 
     while is_reading:
+        print('CODE: ', ser.readline().decode())
         data = ser.readline().decode().strip()
         if data:
             serial_data.append(data)  # Store received data
@@ -46,7 +47,11 @@ def stop_reading(request):
 
 
 def get_data(request):
-    data = [serial_data[-1] if serial_data else None]
+    global is_reading
+    if not is_reading:
+        is_reading = True
+        threading.Thread(target=read_serial, daemon=True).start()
+    data = serial_data[-1] if serial_data else None
     return JsonResponse({"data": data})  # Return collected data
 
 
